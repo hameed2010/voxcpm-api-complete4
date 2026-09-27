@@ -292,23 +292,12 @@ async def handler(job: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Entry point
-# يعمل سواء شغّل RunPod الملف مباشرة (python handler.py)
-# أو استورده كـ module عند النشر من GitHub
+# تحميل النماذج عند بدء التشغيل (Best Practice — بحسب توثيق RunPod الرسمي)
 # ---------------------------------------------------------------------------
-def _start():
-    try:
-        logger.info("Entry point reached — starting model load …")
-        _load_models()
-        logger.info("Models loaded — starting RunPod serverless worker …")
-        runpod.serverless.start({"handler": handler})
-    except Exception:
-        logger.critical("FATAL: worker failed to start.\n%s", traceback.format_exc())
-        sys.exit(1)
+_load_models()
 
-
-# تشغيل مباشر:  python handler.py
-# أو استيراد كـ module من RunPod — في كلا الحالتين يجب الاستدعاء
-import os as _os
-if _os.environ.get("RUNPOD_ENDPOINT_ID") or __name__ == "__main__":
-    _start()
+# ---------------------------------------------------------------------------
+# RunPod Serverless Entry Point
+# يجب أن يكون على مستوى الـ module مباشرة — بدون أي if __name__ أو شرط آخر
+# ---------------------------------------------------------------------------
+runpod.serverless.start({"handler": handler})
